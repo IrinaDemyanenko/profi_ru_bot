@@ -2,6 +2,10 @@
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 from gui.browser import Browser
 from gui.control_buttons import Control_buttons
+from core.refresher import Refresher
+from core.watcher import Watcher
+from core.notifier import Notifier
+from utils.storage import Storage
 
 
 
@@ -24,11 +28,25 @@ class MainWindow(QMainWindow):
         self.browser.load_url('https://profi.ru/')
 
         # добавим виджет с кнопками старт и стоп
-        self.control_panel = Control_buttons(self)
+        self.control_panel = Control_buttons(self)  # self это parent, делаем панель с кнопками дочерним виджетом по отношению к главному окну
+
+        # добавим хранилище
+        self.storage = Storage()
+
+        # отслеживание новых заявок и уведомление
+        self.notifier = Notifier()
+        self.watcher = Watcher(self.browser, self.storage, self.notifier)
 
         # собираем всё в окне
-        layout.addWidget(self.browser)
-        layout.addWidget(self.control_panel)
+        layout.addWidget(self.browser, stretch=1)
+        layout.addWidget(self.control_panel, stretch=0)
+
+        # добавим обновление страницы
+        self.refresher = Refresher(
+            browser=self.browser,
+            watcher=self.watcher,
+            interval=5000
+        )
 
         # соединяем кнопки с сигналами
         self.control_panel.start_button.clicked.connect(self.on_start)
@@ -39,10 +57,12 @@ class MainWindow(QMainWindow):
         """Запускает обновление страницы, делает кнопку старт неактивной."""
         self.control_panel.start_button.setEnabled(False)
         self.control_panel.stop_button.setEnabled(True)
+        self.refresher.start()
         print('Бот Профи.ру запущен')
 
     def on_stop(self):
         """Останавливает обновление страницы, кнопка старт снова активна, стоп - неаутивна."""
         self.control_panel.start_button.setEnabled(True)
         self.control_panel.stop_button.setEnabled(False)
+        self.refresher.stop()
         print('Бот Профи.ру остановлен')

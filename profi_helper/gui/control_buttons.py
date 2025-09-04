@@ -1,5 +1,6 @@
 """Виджиты кнопок и старт и стоп и самой панели управления."""
 from PySide6.QtWidgets import QWidget, QPushButton, QHBoxLayout
+from PySide6.QtCore import Qt
 
 
 
@@ -15,9 +16,20 @@ class Control_buttons(QWidget):
         self.start_button = QPushButton('Старт')  # создадим кнопки старт и стоп
         self.stop_button = QPushButton('Стоп')
 
+        self.start_button.setMinimumHeight(60)  # чтобы кнопки не расползались по экрану
+        self.start_button.setMaximumHeight(100)
+        self.start_button.setMinimumWidth(100)
+        self.start_button.setMaximumWidth(150)
+
+        self.stop_button.setMinimumHeight(60)  # чтобы кнопки не расползались по экрану
+        self.stop_button.setMaximumHeight(100)
+        self.stop_button.setMinimumWidth(100)
+        self.stop_button.setMaximumWidth(150)
+
         self.stop_button.setEnabled(False)  # при запуске стоп не активна
 
         layout = QHBoxLayout()  # две кнопки рядом в горизонтальной раскладке
-        layout.addWidget(self.start_button)
-        layout.addWidget(self.stop_button)
+        layout.addWidget(self.start_button, alignment=Qt.AlignLeft)
+        layout.addWidget(self.stop_button, alignment=Qt.AlignLeft)
+        layout.addStretch()  # прижать всё к левому краю
         self.setLayout(layout)
