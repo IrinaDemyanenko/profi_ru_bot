@@ -15,3 +15,6 @@ class Storage():
             self.seen_orders.add(order_id)
             return True
         return False
+
+    def debug_print(self):
+        print('Текущее хранилище:', self.seen_orders)

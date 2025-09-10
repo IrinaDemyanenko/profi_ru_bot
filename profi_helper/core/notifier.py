@@ -20,10 +20,11 @@ class Notifier():
 
     def sound_notify(self):
         """Включает звуковое уведомление о событии."""
-        if self.sound.isLoaded():
-            self.sound.play()
-        else:
-            print('Проблема со звуковым файлом - файл не загружен.')
+        # if self.sound.isLoaded():
+        #     self.sound.play()
+        # else:
+        #     print('Проблема со звуковым файлом - файл не загружен.')
+        self.sound.play()
 
     def popup_notify(self, message: str):
         """Включает неблокирующее основную программу popup-окно с уведомлением."""

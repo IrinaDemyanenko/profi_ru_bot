@@ -2,6 +2,7 @@
 import sys
 from PySide6.QtWidgets import QApplication
 from gui.main_window import MainWindow
+from core.logger import get_logger
 
 
 
@@ -13,4 +14,8 @@ def start_profi_helper():
 
 
 if __name__ == '__main__':
-    start_profi_helper()
+    get_logger().info('Запуск бота Профи.ру')
+    try:
+        start_profi_helper()
+    except Exception as e:
+        get_logger().exception(f'Ошибка при запуске бота Профи.ру: {e}')

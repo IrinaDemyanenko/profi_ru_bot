@@ -1,38 +1,51 @@
 """Наблюдатель, который отслеживает новые заявки и включает уведомление."""
-from PySide6.QtWebEngineWidgets import QWebEngineView
+from core.parser import Parser
 from utils.storage import Storage
-from bs4 import BeautifulSoup
 
 
 class Watcher():
-    """Класс связывает встроенный браузер, хранилище заявок и уведомления."""
-    def __init__(self, browser: QWebEngineView, storage: Storage, notifier):
+    """Класс связывает парсер, браузер, хранилище заявок и уведомления."""
+    def __init__(self, browser, storage: Storage, notifier, mode='js'):
+        """
+        browser - встроенный браузер (QWebEngineView),
+        storage - хранилище заказов (сейчас множество, можно заменить на SQLite),
+        notifier - объект для уведомлений (звук, popup и т.д.),
+        mode - режим парсинга: "html" или "js".
+        """
         self.browser = browser
         self.storage = storage
         self.notifier = notifier
+        self.parser = Parser(self.browser, mode)
 
     def check_new_orders(self):
-        """Связывает две функции: асинхронно запрашивает HTML
-        и применяет к нему поиск новых заказов."""
-        try:
-            self.browser.page().toHtml(self.process_html)
-        except Exception as e:
-            print(f'Ошибка при получении файла HTML: {e}')
-
-    def process_html(self, html: str):
-        """Из полученного файла HTML создаёт DOM дерево.
-        Ищет новые заказы по тегу и сравнивает с хранилищем.
-        Если находит, включает звуковое/текстовое уведомление.
+        """Запрашивает через парсер наличие новых заказов (0\1\-1)
+        и обрабатывает результат.
         """
-        tree = BeautifulSoup(html, 'html.parser')  # 'html.parser' встроенный парсер, медленный, есть быстрее
+        try:
+            self.parser.get_orders(self._process_orders)
+        except Exception as e:
+            print(f'Ошибка при проверке заказов: {e}')
 
-        orders = tree.find_all('div', class_='order-card')
-        if not orders:
-            print('Заказы не найдены!')
+    def _process_orders(self, result: int):
+        """Получает от парсера:
+            1 - есть новая заявка
+            0 - нет новых заявок
+           -1 - ошибка или неожиданный результат
+        Если есть -  включает звуковое/текстовое уведомление.
+        """
+        print("DEBUG: парсер вернул ->", result)
+
+        if result == 0:
+            print('Новых заявок нет!')
+            # Сохраняем HTML для анализа
+            # self.parser.dump_html("debug_no_orders.html")
+            # self.storage.debug_print()
             return
-        # если заказов нет, вернётся, если есть, будем искать "новые"
-        for order in orders:
-            order_id = order.get('data-id') or order.text.strip()[:30]
-            if self.storage.is_new(order_id):
-                self.notifier.sound_notify()
-                # self.notifier.popup_notify(message='Найдена новая заявка') пока выключим
+
+        elif result == 1:
+            self.notifier.sound_notify()
+            # self.notifier.popup_notify(message='Найдена новая заявка') пока выключим
+
+        else:
+            print('Непредвиденный результат от парсера, смотри HTML для анализа.')
+            self.parser.dump_html('debug_parser.html')
