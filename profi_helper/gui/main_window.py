@@ -43,8 +43,9 @@ class MainWindow(QMainWindow):
         self.watcher = Watcher(self.browser, self.storage, self.notifier, mode='js')
 
         # собираем всё в окне
-        layout.addWidget(self.browser, stretch=1)
         layout.addWidget(self.control_panel, stretch=0)
+        layout.addWidget(self.browser, stretch=1)
+
 
         # добавим обновление страницы
         self.refresher = Refresher(
@@ -63,6 +64,7 @@ class MainWindow(QMainWindow):
         """Запускает обновление страницы, делает кнопку старт неактивной."""
         self.control_panel.start_button.setEnabled(False)
         self.control_panel.stop_button.setEnabled(True)
+        self.watcher.start()
         self.refresher.start()
         print('Бот Профи.ру запущен')
 
@@ -70,5 +72,7 @@ class MainWindow(QMainWindow):
         """Останавливает обновление страницы, кнопка старт снова активна, стоп - неактивна."""
         self.control_panel.start_button.setEnabled(True)
         self.control_panel.stop_button.setEnabled(False)
+        self.watcher.stop()
         self.refresher.stop()
+        self.notifier.stop_sound()
         print('Бот Профи.ру остановлен')

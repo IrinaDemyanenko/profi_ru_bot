@@ -29,7 +29,8 @@ class Control_buttons(QWidget):
         self.stop_button.setEnabled(False)  # при запуске стоп не активна
 
         layout = QHBoxLayout()  # две кнопки рядом в горизонтальной раскладке
-        layout.addWidget(self.start_button, alignment=Qt.AlignLeft)
-        layout.addWidget(self.stop_button, alignment=Qt.AlignLeft)
-        layout.addStretch()  # прижать всё к левому краю
+        layout.addStretch()  # прижать всё к правому краю
+        layout.addWidget(self.start_button, alignment=Qt.AlignRight)
+        layout.addWidget(self.stop_button, alignment=Qt.AlignRight)
+        # layout.addStretch()  # прижать всё к левому краю
         self.setLayout(layout)

@@ -10,21 +10,34 @@ class Watcher():
         browser - встроенный браузер (QWebEngineView),
         storage - хранилище заказов (сейчас множество, можно заменить на SQLite),
         notifier - объект для уведомлений (звук, popup и т.д.),
-        mode - режим парсинга: "html" или "js".
+        mode - режим парсинга: "html" или "js",
+        running - работает ли бот.
         """
         self.browser = browser
         self.storage = storage
         self.notifier = notifier
         self.parser = Parser(self.browser, mode)
+        self.running = False  # бот работает или нет
+
+    def start(self):
+        """Включает наблюдателя."""
+        self.running = True
+
+    def stop(self):
+        """Выключает наблюдателя."""
+        self.running = False
 
     def check_new_orders(self):
         """Запрашивает через парсер наличие новых заказов (0\1\-1)
         и обрабатывает результат.
         """
-        try:
-            self.parser.get_orders(self._process_orders)
-        except Exception as e:
-            print(f'Ошибка при проверке заказов: {e}')
+        if not self.running:
+            return  # не проверяем заявки, если бот остановлен
+        else:
+            try:
+                self.parser.get_orders(self._process_orders)
+            except Exception as e:
+                print(f'Ошибка при проверке заказов: {e}')
 
     def _process_orders(self, result: int):
         """Получает от парсера:
